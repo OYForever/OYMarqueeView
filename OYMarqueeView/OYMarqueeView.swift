@@ -43,18 +43,18 @@ public final class OYMarqueeView: UIView {
         }
     }
     /// 滚动方向
-    enum ScrollDirection {
+    public enum ScrollDirection {
         case horizontal
         case vertical
     }
     /// 滚动方向，默认横向
     private(set) var scrollDirection: ScrollDirection = .horizontal
     /// 移动速度最小为0，每次屏幕刷新所移动的距离（单位dp），该值取绝对值
-    var speed: CGFloat = 1
+    public var speed: CGFloat = 1
     /// 数据源
-    var dataSourse: MarqueeViewDataSource?
+    public var dataSourse: MarqueeViewDataSource?
     ///item间距 默认30
-    var space: CGFloat  = 30
+    public var space: CGFloat  = 30
     /// 展示项目最少超出视图间距
     private var offset: CGFloat = 100
     /// 当前最后一个角标
@@ -80,14 +80,14 @@ public final class OYMarqueeView: UIView {
         timer = nil
     }
     
-    init(frame: CGRect = .zero, scrollDirection: ScrollDirection = .horizontal) {
+    public init(frame: CGRect = .zero, scrollDirection: ScrollDirection = .horizontal) {
         super.init(frame: frame)
         self.scrollDirection = scrollDirection
         self.clipsToBounds = true
         self.initTimer()
     }
     
-    init() {
+    public init() {
         super.init(frame: CGRect.zero)
         self.clipsToBounds = true
         self.initTimer()
@@ -103,11 +103,11 @@ public final class OYMarqueeView: UIView {
     }
     
     // MARK: - Public Func
-    func register(_ itemClass: AnyClass, forCellReuseIdentifier identifier: String) {
+    public func register(_ itemClass: AnyClass, forCellReuseIdentifier identifier: String) {
         idCache[String(describing: itemClass)] = identifier
     }
     
-    func dequeueReusableItem(withIdentifier identifier: String) -> UIView? {
+    public func dequeueReusableItem(withIdentifier identifier: String) -> UIView? {
         let view = viewFromCache(identifier)
         if let pro = view as? OYMarqueeViewItem {
             pro.prepareForReuse()
@@ -115,7 +115,7 @@ public final class OYMarqueeView: UIView {
         return view
     }
     
-    func reloadData() {
+    public func reloadData() {
         timer?.invalidate()
         timer = nil
         subviews.forEach { (view) in
