@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import OYMarqueeView
 
 class TextView: OYMarqueeViewItem {
     
@@ -14,7 +15,6 @@ class TextView: OYMarqueeViewItem {
             textLabel.text = text
         }
     }
-    
     
     lazy var textLabel: UILabel = {
         let label = UILabel()

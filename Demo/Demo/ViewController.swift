@@ -6,6 +6,8 @@
 //
 
 import UIKit
+import SnapKit
+import OYMarqueeView
 
 class ViewController: UIViewController {
 

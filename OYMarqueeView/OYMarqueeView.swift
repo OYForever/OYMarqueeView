@@ -9,7 +9,7 @@
 import UIKit
 
 // MARK: - OYMarqueeViewItem
-public class OYMarqueeViewItem: UIView {
+open class OYMarqueeViewItem: UIView {
     private(set) var reuseIdentifier: String
     
     public init() {
@@ -23,7 +23,7 @@ public class OYMarqueeViewItem: UIView {
     }
     
     @available(*, unavailable)
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 }

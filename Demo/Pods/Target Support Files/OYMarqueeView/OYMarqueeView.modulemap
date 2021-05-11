@@ -1,0 +1,6 @@
+framework module OYMarqueeView {
+  umbrella header "OYMarqueeView-umbrella.h"
+
+  export *
+  module * { export * }
+}
