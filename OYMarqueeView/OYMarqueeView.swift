@@ -9,17 +9,31 @@
 import UIKit
 
 // MARK: - OYMarqueeViewItem
-/// 重用刷新协议，需要在重用时刷新的，只需要自己的item实现这个协议即可
-public protocol OYMarqueeViewItem {
-    func prepareForReuse()
+public class OYMarqueeViewItem: UIView {
+    private(set) var reuseIdentifier: String
+    
+    public init() {
+        self.reuseIdentifier = ""
+        super.init(frame: CGRect.zero)
+    }
+    
+    required public init(reuseIdentifier: String) {
+        self.reuseIdentifier = reuseIdentifier
+        super.init(frame: CGRect.zero)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
 }
 
 // MARK: - MarqueeViewDataSource
-public protocol MarqueeViewDataSource {
+public protocol OYMarqueeViewDataSource {
     ///一共有多少个item
     func numberOfItems(in marqueeView: OYMarqueeView) -> Int
     ///当前item视图
-    func marqueeView(_ marqueeView: OYMarqueeView, itemForIndexAt index: Int) -> UIView
+    func marqueeView(_ marqueeView: OYMarqueeView, itemForIndexAt index: Int) -> OYMarqueeViewItem
     ///当前item的大小
     func marqueeView(_ marqueeView: OYMarqueeView, itemSizeForIndexAt index: Int) -> CGSize
 }
@@ -52,7 +66,7 @@ public final class OYMarqueeView: UIView {
     /// 移动速度最小为0，每次屏幕刷新所移动的距离（单位dp），该值取绝对值
     public var speed: CGFloat = 1
     /// 数据源
-    public var dataSourse: MarqueeViewDataSource?
+    public var dataSourse: OYMarqueeViewDataSource?
     ///item间距 默认30
     public var space: CGFloat  = 30
     /// 展示项目最少超出视图间距
@@ -62,11 +76,11 @@ public final class OYMarqueeView: UIView {
     /// 上一次的frame
     private var oldFrame: CGRect?
     /// 可视view数组
-    private var visibleViewArr: [UIView] = [UIView]()
+    private var visibleViewArr: [OYMarqueeViewItem] = [OYMarqueeViewItem]()
     /// 重用view缓存
-    private var reuseViewCache: [String: LinkQueue<UIView>] = [String: LinkQueue<UIView>]()
+    private var reuseViewCache: [String: LinkQueue<OYMarqueeViewItem>] = [String: LinkQueue<OYMarqueeViewItem>]()
     /// 重用id和class对应关系缓存
-    private var idCache: [String: String] = [String: String]()
+    private var idCache: [String: AnyClass] = [String: AnyClass]()
     /// 定时器
     private var timer: CADisplayLink?
     /// 条目个数
@@ -103,16 +117,12 @@ public final class OYMarqueeView: UIView {
     }
     
     // MARK: - Public Func
-    public func register(_ itemClass: AnyClass, forCellReuseIdentifier identifier: String) {
-        idCache[String(describing: itemClass)] = identifier
+    public func register(_ itemClass: AnyClass, forItemReuseIdentifier identifier: String) {
+        idCache[identifier] = itemClass
     }
     
-    public func dequeueReusableItem(withIdentifier identifier: String) -> UIView? {
-        let view = viewFromCache(identifier)
-        if let pro = view as? OYMarqueeViewItem {
-            pro.prepareForReuse()
-        }
-        return view
+    public func dequeueReusableItem(withIdentifier identifier: String) -> OYMarqueeViewItem {
+        return viewFromCache(identifier)
     }
     
     public func reloadData() {
@@ -123,7 +133,7 @@ public final class OYMarqueeView: UIView {
         }
         clearCache()
         
-        guard let dataSourse = dataSourse else { return }
+        guard let dataSourse = dataSourse, dataSourse.numberOfItems(in: self) > 0 else { return }
         
         currentIndex = 0
         switch scrollDirection {
@@ -178,19 +188,19 @@ public final class OYMarqueeView: UIView {
         }
         switch scrollDirection {
         case .horizontal:
-                if firstShowView.frame.maxX < 0 {
-                    visibleViewArr.removeFirst()
-                    saveViewToCache(firstShowView)
-                }
+            if firstShowView.frame.maxX < 0 {
+                visibleViewArr.removeFirst()
+                saveViewToCache(firstShowView)
+            }
             let lastViewRight = lastShowView.frame.maxX
-                if lastViewRight <= frameWidth + offset {
-                    if currentIndex < itemCount - 1{
-                        currentIndex += 1
-                    } else {
-                        currentIndex = 0
-                    }
-                    addItem(origin: lastViewRight + space)
+            if lastViewRight <= frameWidth + offset {
+                if currentIndex < itemCount - 1{
+                    currentIndex += 1
+                } else {
+                    currentIndex = 0
                 }
+                addItem(origin: lastViewRight + space)
+            }
         case .vertical:
             if firstShowView.frame.maxY < 0 {
                 visibleViewArr.removeFirst()
@@ -223,47 +233,49 @@ public final class OYMarqueeView: UIView {
     
     @discardableResult
     private func addItem(origin: CGFloat) -> CGSize {
-        let frameWidth = frame.width
-        let frameHeight = frame.height
         var itemSize = self.sizeCache[currentIndex]
-
+        
         guard let dataSourse = dataSourse else {
             return CGSize.zero
         }
-
+        
         if itemSize == nil || itemSize == CGSize.zero {
             itemSize = dataSourse.marqueeView(self, itemSizeForIndexAt: currentIndex)
             sizeCache[currentIndex] = itemSize
         }
-
+        
         let item = dataSourse.marqueeView(self, itemForIndexAt: currentIndex)
         switch scrollDirection {
         case .horizontal:
-            item.frame = CGRect(x: origin, y: 0, width: itemSize?.width ?? 0, height: frameHeight)
+            item.frame = CGRect(x: origin, y: 0, width: itemSize?.width ?? 0, height: itemSize?.height ?? 0)
         case .vertical:
-            item.frame = CGRect(x: 0, y: origin, width: frameWidth, height: itemSize?.height ?? 0)
+            item.frame = CGRect(x: 0, y: origin, width: itemSize?.width ?? 0, height: itemSize?.height ?? 0)
         }
-        self.addSubview(item)
-        self.visibleViewArr.append(item)
+        addSubview(item)
+        visibleViewArr.append(item)
         return itemSize ?? CGSize.zero
     }
     
     // MARK: - Cache
-    private func saveViewToCache(_ view: UIView) {
-        guard let reuseIdentity = idCache[String(describing: view.classForCoder)] else {
-            fatalError("MarqueeView: \(view.classForCoder) reuseIdentity NO Register")
-        }
-        guard let viewQuene = reuseViewCache[reuseIdentity] else {
-            let linkQueue = LinkQueue<UIView>()
+    private func saveViewToCache(_ view: OYMarqueeViewItem) {
+        guard let viewQuene = reuseViewCache[view.reuseIdentifier] else {
+            let linkQueue = LinkQueue<OYMarqueeViewItem>()
             linkQueue.enqueue(view)
-            reuseViewCache[reuseIdentity] = linkQueue
+            reuseViewCache[view.reuseIdentifier] = linkQueue
             return
         }
         viewQuene.enqueue(view)
     }
     
-    private func viewFromCache(_ identifier: String) -> UIView? {
-        return reuseViewCache[identifier]?.dequeue()
+    private func viewFromCache(_ identifier: String) -> OYMarqueeViewItem {
+        if let view = reuseViewCache[identifier]?.dequeue() {
+            return view
+        }
+        guard let itemClass = idCache[identifier] as? OYMarqueeViewItem.Type else {
+            fatalError("MarqueeView: unable to dequeue a item with identifier \(identifier) - must register a class for the identifier")
+        }
+        let item = itemClass.init(reuseIdentifier: identifier)
+        return item
     }
     
     private func clearCache() {
