@@ -29,7 +29,7 @@ open class OYMarqueeViewItem: UIView {
 }
 
 // MARK: - MarqueeViewDataSource
-public protocol OYMarqueeViewDataSource {
+public protocol OYMarqueeViewDataSource: AnyObject {
     ///一共有多少个item
     func numberOfItems(in marqueeView: OYMarqueeView) -> Int
     ///当前item视图
@@ -66,7 +66,7 @@ public final class OYMarqueeView: UIView {
     /// 移动速度最小为0，每次屏幕刷新所移动的距离（单位dp），该值取绝对值
     public var speed: CGFloat = 1
     /// 数据源
-    public var dataSourse: OYMarqueeViewDataSource?
+    public weak var dataSourse: OYMarqueeViewDataSource?
     ///item间距 默认30
     public var space: CGFloat  = 30
     /// 展示项目最少超出视图间距
