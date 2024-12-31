@@ -53,10 +53,14 @@ public final class OYMarqueeView: UIView {
     private(set) var scrollDirection: ScrollDirection
     public var scrollOrientation: ScrollOrientation = .forward
     
-    public var speed: CGFloat = 1 {
-        didSet { speed = max(0, speed) }
+    /// 每秒移动的像素点
+    public var pixelsPerSecond: CGFloat = 50 {
+        didSet {
+            updateSpeed()
+        }
     }
     
+    private var speed: CGFloat = 1
     public var space: CGFloat = 30
     private var offset: CGFloat = 100
     
@@ -127,6 +131,7 @@ public final class OYMarqueeView: UIView {
     private func setupDisplayLink() {
         displayLink = CADisplayLink(target: WeakProxy(target: self), selector: #selector(update))
         displayLink?.add(to: .main, forMode: .common)
+        updateSpeed()
     }
     
     private func invalidateDisplayLink() {
@@ -179,18 +184,20 @@ public final class OYMarqueeView: UIView {
         }
     }
     
+    private func updateSpeed() {
+        speed = pixelsPerSecond / CGFloat(UIScreen.main.maximumFramesPerSecond)
+    }
+    
     @objc private func update() {
-        let distance = scrollOrientation == .forward ? -speed : speed
-        
-        visibleItems.forEach { item in
+        visibleItems.forEach { (view) in
+            let distance = scrollOrientation == .forward ? -speed : speed
             switch scrollDirection {
             case .horizontal:
-                item.transform = item.transform.translatedBy(x: distance, y: 0)
+                view.transform = view.transform.translatedBy(x: distance, y: 0)
             case .vertical:
-                item.transform = item.transform.translatedBy(x: 0, y: distance)
+                view.transform = view.transform.translatedBy(x: 0, y: distance)
             }
         }
-        
         updateVisibleItems()
     }
     

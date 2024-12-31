@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name = 'OYMarqueeView'
-  s.version = '1.1.0'
+  s.version = '1.1.1'
   s.summary = '基于Swift 5的轻量级跑马灯视图，支持横向或竖向滚动，仿cell复用机制支持视图复用'
   s.homepage = 'https://github.com/OYForever/OYMarqueeView'
   s.license = 'MIT'
