@@ -9,9 +9,9 @@
 import Foundation
 
 class LinkQueue<T> {
-    private class LinkNode<T> {
+    private class LinkNode {
         var data: T?
-        var next: LinkNode<T>?
+        var next: LinkNode?
         
         @available(*, unavailable)
         init() {}
@@ -21,8 +21,8 @@ class LinkQueue<T> {
         }
     }
     
-    private var firstNode: LinkNode<T>?
-    private var lastNode: LinkNode<T>?
+    private var firstNode: LinkNode?
+    private var lastNode: LinkNode?
     
     /// 入队
     /// - Parameter data: 数据

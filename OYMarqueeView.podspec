@@ -6,7 +6,7 @@ Pod::Spec.new do |s|
   s.license = 'MIT'
   s.authors = { 'Zero' => '478027478@qq.com' }
   s.social_media_url = 'https://github.com/OYForever'
-  s.ios.deployment_target = '8.0'
+  s.ios.deployment_target = '12.0'
   s.source = { :git => 'https://github.com/OYForever/OYMarqueeView.git', :tag => s.version }
   
   s.swift_versions = '5.0'
