@@ -130,6 +130,7 @@ public final class OYMarqueeView: UIView {
     // MARK: - Private Methods
     private func setupDisplayLink() {
         displayLink = CADisplayLink(target: WeakProxy(target: self), selector: #selector(update))
+        displayLink?.preferredFramesPerSecond = 60
         displayLink?.add(to: .main, forMode: .common)
         updateSpeed()
     }
@@ -185,7 +186,7 @@ public final class OYMarqueeView: UIView {
     }
     
     private func updateSpeed() {
-        speed = pixelsPerSecond / CGFloat(UIScreen.main.maximumFramesPerSecond)
+        speed = pixelsPerSecond / 60
     }
     
     @objc private func update() {
