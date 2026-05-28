@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
   s.name = 'OYMarqueeView'
-  s.version = '1.1.2'
-  s.summary = '基于Swift 5的轻量级跑马灯视图，支持横向或竖向滚动，仿cell复用机制支持视图复用'
+  s.version = '1.3.1'
+  s.summary = '基于Swift 5/6的轻量级跑马灯视图，支持横向或竖向滚动，仿cell复用机制支持视图复用'
   s.homepage = 'https://github.com/OYForever/OYMarqueeView'
   s.license = 'MIT'
   s.authors = { 'Zero' => '478027478@qq.com' }
@@ -9,7 +9,7 @@ Pod::Spec.new do |s|
   s.ios.deployment_target = '12.0'
   s.source = { :git => 'https://github.com/OYForever/OYMarqueeView.git', :tag => s.version }
   
-  s.swift_versions = '5.0'
+  s.swift_versions = ['5.0', '6.0']
 
   s.source_files = 'OYMarqueeView/**/*'
 end
